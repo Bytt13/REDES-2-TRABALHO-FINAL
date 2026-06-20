@@ -7,7 +7,7 @@
 * Funcao...........: Maneja as APDUs que vao ser utilizadas no projeto
 *************************************************************** */
 
-package cliente.Protocol;
+package Protocol;
 
 import java.io.Serializable;
 import java.util.UUID;

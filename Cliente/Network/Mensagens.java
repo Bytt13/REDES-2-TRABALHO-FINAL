@@ -1,4 +1,4 @@
-package cliente.Network;
+package Network;
 
 public class Mensagens {
     
