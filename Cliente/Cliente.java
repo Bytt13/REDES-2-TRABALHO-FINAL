@@ -1,0 +1,52 @@
+/***************************************************************** 
+* Autor..............: Lucas de Menezes Chaves
+* Matricula........: 202310282
+* Inicio...........: 20/06/2026
+* Ultima alteracao.: 28/06/2026
+* Nome.............: Cliente
+* Funcao...........: Cliente maestro, que coordena os outros arquivos do lado do cliente
+*************************************************************** */
+
+package Cliente;
+
+import Cliente.Protocol.APDU;
+import java.net.Socket;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+
+public class Cliente {
+  private String ipServidor;
+  private int portaTCP;
+
+  /********************************************************************
+  * Metodo: Cliente
+  * Funcao: Construtor do Cliente
+  * @param ipServidor ip do servidor
+  * @param portaTCP porta tcp
+  * @return void
+  * ****************************************************************** */
+ public Cliente(String ipServidor, int portaTCP) {
+  this.ipServidor = ipServidor;
+  this.portaTCP = portaTCP;
+ }//fim do metodo
+  /********************************************************************
+  * Metodo: enviarComandoTCP
+  * Funcao: enviar o comando TCP para se conectar no servidor
+  * @param apdu objeto apdu
+  * @return void
+  * ****************************************************************** */
+ public void enviarComandoTCP(APDU apdu) {
+  //Tenta conectar no IP e porta fornecidos
+  try(Socket socket = new Socket(ipServidor, portaTCP);
+    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+    @SuppressWarnings("unused")
+    ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+      System.out.println("Conectado ao Servidor! Enviando APDU: " + apdu.getOperacao());
+      //Envia a carta
+      out.writeObject(apdu);
+      out.flush();
+  } catch(Exception e) {
+    System.err.println("Erro na comunicacao com o Servidor: " + e.getMessage());
+  }//fim do try-catch
+ }//fim do metodo
+}//fim da classe

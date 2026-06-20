@@ -1,0 +1,81 @@
+/***************************************************************** 
+* Autor..............: Lucas de Menezes Chaves
+* Matricula........: 202310282
+* Inicio...........: 20/06/2026
+* Ultima alteracao.: 28/06/2026
+* Nome.............: Principal
+* Funcao...........: Executa o Cliente
+*************************************************************** */
+
+package Cliente;
+
+import Cliente.Protocol.APDU;
+import java.util.Scanner;
+import Cliente.Network.Descobridor;
+
+public class Principal {
+  /********************************************************************
+   * Metodo: main
+   * Funcao: inicia a execucao do programa
+   * @param void
+   * @return void
+  * ****************************************************************** */
+ public static void main(String[] args) {
+  Scanner scanner = new Scanner(System.in);
+
+  System.out.println("====================================");
+  System.out.println("   BEM-VINDO AO TERMINAL DO CHAT");
+  System.out.println("====================================");
+
+  String ipServidor = Descobridor.buscarIPServidor();
+
+  if(ipServidor == null) {
+    System.out.println("Falha ao encontrar o servidor automaticamente.");
+    System.out.print("Digite o IP do servidor manualmente (ou 'localhost'): ");
+    ipServidor = scanner.nextLine().trim();
+  } else {
+    System.out.println("Servidor encontrado automaticamente no IP: " + ipServidor);
+  }//fim do if-else
+
+  Cliente cliente = new Cliente(ipServidor, 6789);
+  System.out.println("\nComandos disponíveis:");
+  System.out.println("  -entrar <nomeGrupo> <nomeUsuario>");
+  System.out.println("  -sair <nomeGrupo> <nomeUsuario>");
+  System.out.println("  -fechar");
+
+  while(true) {
+    System.out.print("\n> ");
+    String entrada = scanner.nextLine().trim();
+
+    if (entrada.isEmpty()) continue;
+
+    String[] partes = entrada.split("\\s+");
+    String comando = partes[0].toLowerCase();
+
+    if (comando.equals("-fechar")) {
+        System.out.println("A encerrar o cliente...");
+        break;
+    }//fim do if
+
+    if (partes.length < 3) {
+        System.out.println("Formato incorreto. Utilize: -comando <grupo> <usuario>");
+        continue;
+    }//fim do if
+
+    String grupo = partes[1];
+    String usuario = partes[2];
+    int portaUDP = 5000;
+
+    if(comando.equals("-entrar")) {
+      APDU joinMsg = new APDU("JOIN", grupo, usuario, null, portaUDP);
+      cliente.enviarComandoTCP(joinMsg);
+    } else if (comando.equals("-sair")) {
+      APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDP);
+      cliente.enviarComandoTCP(leaveMsg);
+    } else {
+      System.out.println("Comando Desconhecido: " + comando);
+    }//fim do if-elseif-else
+  }//fim do while
+  scanner.close();
+ }//fim do metodo
+}//fim da classe
