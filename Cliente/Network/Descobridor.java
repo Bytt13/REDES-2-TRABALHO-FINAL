@@ -7,7 +7,7 @@
 * Funcao...........: Descobrir o IP do servidor
 *************************************************************** */
 
-package Cliente.Network;
+package cliente.Network;
 
 import java.net.*;
 

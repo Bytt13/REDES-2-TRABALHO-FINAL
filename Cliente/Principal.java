@@ -7,11 +7,12 @@
 * Funcao...........: Executa o Cliente
 *************************************************************** */
 
-package Cliente;
+package cliente;
 
-import Cliente.Protocol.APDU;
 import java.util.Scanner;
-import Cliente.Network.Descobridor;
+
+import cliente.Network.Descobridor;
+import cliente.Protocol.APDU;
 
 public class Principal {
   /********************************************************************

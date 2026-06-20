@@ -7,10 +7,12 @@
 * Funcao...........: Cliente maestro, que coordena os outros arquivos do lado do cliente
 *************************************************************** */
 
-package Cliente;
+package cliente;
 
-import Cliente.Protocol.APDU;
 import java.net.Socket;
+
+import cliente.Protocol.APDU;
+
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 

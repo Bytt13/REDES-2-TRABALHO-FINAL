@@ -1,4 +1,4 @@
-package Cliente.Controller;
+package cliente.Controller;
 
 public class ChatController {
     
