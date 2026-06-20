@@ -39,12 +39,14 @@ public class Cliente {
   //Tenta conectar no IP e porta fornecidos
   try(Socket socket = new Socket(ipServidor, portaTCP);
     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-    @SuppressWarnings("unused")
     ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
       System.out.println("Conectado ao Servidor! Enviando APDU: " + apdu.getOperacao());
       //Envia a carta
       out.writeObject(apdu);
       out.flush();
+
+      String resposta = (String) in.readObject();
+      System.out.println("Resposta do Servidor: " + resposta);
   } catch(Exception e) {
     System.err.println("Erro na comunicacao com o Servidor: " + e.getMessage());
   }//fim do try-catch
