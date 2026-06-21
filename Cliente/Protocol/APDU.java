@@ -44,7 +44,7 @@ public class APDU implements Serializable{
   this.portaClienteUDP = portaClienteUDP;
 
   //Se for SEND, gera um ID único para rastrear os ticks do zap
-  if(this.operacao == "SEND") {
+  if(this.operacao.equals("SEND")) {
     this.idMensagem = UUID.randomUUID().toString();
     this.statusRecebido = 0; //nasce como criada, e só vira enviada, quando o SERVIDOR CONFIRMA QUE RECEBEU
   }//fim do if
