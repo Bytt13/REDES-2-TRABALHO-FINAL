@@ -35,12 +35,16 @@ public class Principal {
   } else {
     System.out.println("Servidor encontrado automaticamente no IP: " + ipServidor);
   }//fim do if-else
-
+  
+  int portaUDPCliente = 5000 + (int)(Math.random() * 1000);
+  RecebedorUDP recebedor = new RecebedorUDP(portaUDPCliente);
+  recebedor.start();
+  
   Cliente cliente = new Cliente(ipServidor, 6789);
   System.out.println("\nComandos disponíveis:");
   System.out.println("  -entrar <nomeGrupo> <nomeUsuario>");
   System.out.println("  -sair <nomeGrupo> <nomeUsuario>");
-  System.out.println(". -enviar <nomeGrupo> <nomeUsuario>");
+  System.out.println(". -enviar <nomeGrupo> <nomeUsuario> <Texto>");
   System.out.println("  -fechar");
 
   while(true) {
@@ -64,13 +68,12 @@ public class Principal {
 
     String grupo = partes[1];
     String usuario = partes[2];
-    int portaUDP = 5000;
 
     if(comando.equals("-entrar")) {
-      APDU joinMsg = new APDU("JOIN", grupo, usuario, null, portaUDP);
+      APDU joinMsg = new APDU("JOIN", grupo, usuario, null, portaUDPCliente);
       cliente.enviarComandoTCP(joinMsg);
     } else if (comando.equals("-sair")) {
-      APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDP);
+      APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDPCliente);
       cliente.enviarComandoTCP(leaveMsg);
     } else if (comando.equals("-enviar")) {
       if(partes.length < 4) {
@@ -83,8 +86,8 @@ public class Principal {
       for(int i = 3; i < partes.length; i++) {
         texto.append(partes[i]).append(" ");
       }//fim do for
-      APDU sendMsg = new APDU("SEND", grupo, usuario, texto.toString().trim(), portaUDP);
-      cliente.enviarComandoTCP(sendMsg);
+      APDU sendMsg = new APDU("SEND", grupo, usuario, texto.toString().trim(), portaUDPCliente);
+      cliente.enviarMensagemUDP(sendMsg,7777);
     }else {
       System.out.println("Comando Desconhecido: " + comando);
     }//fim do if-elseif-elseif-else
