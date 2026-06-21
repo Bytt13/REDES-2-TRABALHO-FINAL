@@ -9,6 +9,7 @@
 
 import java.util.Scanner;
 import Network.Descobridor;
+import Network.RecebedorUDP;
 import Protocol.APDU;
 
 public class Principal {
@@ -39,6 +40,7 @@ public class Principal {
   System.out.println("\nComandos disponíveis:");
   System.out.println("  -entrar <nomeGrupo> <nomeUsuario>");
   System.out.println("  -sair <nomeGrupo> <nomeUsuario>");
+  System.out.println(". -enviar <nomeGrupo> <nomeUsuario>");
   System.out.println("  -fechar");
 
   while(true) {
@@ -70,9 +72,22 @@ public class Principal {
     } else if (comando.equals("-sair")) {
       APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDP);
       cliente.enviarComandoTCP(leaveMsg);
-    } else {
+    } else if (comando.equals("-enviar")) {
+      if(partes.length < 4) {
+        System.out.println("Formato incorreto, utilize: -comando <Grupo> <Usuario> <Mensagem>");
+        continue;
+      }//fim do if
+
+      //Concatena tudo que o usuario escreveu para formar o texto
+      StringBuilder texto = new StringBuilder();
+      for(int i = 3; i < partes.length; i++) {
+        texto.append(partes[i]).append(" ");
+      }//fim do for
+      APDU sendMsg = new APDU("SEND", grupo, usuario, texto.toString().trim(), portaUDP);
+      cliente.enviarComandoTCP(sendMsg);
+    }else {
       System.out.println("Comando Desconhecido: " + comando);
-    }//fim do if-elseif-else
+    }//fim do if-elseif-elseif-else
   }//fim do while
   scanner.close();
  }//fim do metodo

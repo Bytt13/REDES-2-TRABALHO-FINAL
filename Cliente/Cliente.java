@@ -7,12 +7,9 @@
 * Funcao...........: Cliente maestro, que coordena os outros arquivos do lado do cliente
 *************************************************************** */
 
-import java.net.Socket;
-
+import java.net.*;
 import Protocol.APDU;
-
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 
 public class Cliente {
   private String ipServidor;
@@ -49,6 +46,27 @@ public class Cliente {
       System.out.println("Resposta do Servidor: " + resposta);
   } catch(Exception e) {
     System.err.println("Erro na comunicacao com o Servidor: " + e.getMessage());
+  }//fim do try-catch
+ }//fim do metodo
+  /********************************************************************
+  * Metodo: enviarMensagemUDP
+  * Funcao: enviar uma mensagem UDP para o servidor
+  * @param apdu objeto apdu
+  * @param portaServidorUDP porta do servidor UDP
+  * @return void
+  * ****************************************************************** */
+ public void enviarMensagemUDP(APDU apdu, int portaServidorUDP) {
+  try(DatagramSocket socket = new DatagramSocket()) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(baos);
+    out.writeObject(apdu);
+    out.flush();
+    byte[] dados = baos.toByteArray();
+    DatagramPacket pacote = new DatagramPacket(dados, dados.length, InetAddress.getByName(ipServidor) , portaServidorUDP);
+    socket.send(pacote);
+    System.out.println("(Reloginho) Mensagem enviada ao servidor");
+  } catch(Exception e) {
+    System.err.println("Falha ao enviar a mensagem: "+ e.getMessage());
   }//fim do try-catch
  }//fim do metodo
 }//fim da classe

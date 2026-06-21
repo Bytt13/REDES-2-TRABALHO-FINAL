@@ -8,6 +8,7 @@
 *************************************************************** */
 
 import Network.ServidorTCP;
+import Network.ServidorUDP;
 import Network.ServidorDescoberta;
 import Model.Grupos;
 
@@ -29,5 +30,8 @@ public class Servidor {
     //Instancia e inicia a thread do servidor TCP
     ServidorTCP servidorTCP = new ServidorTCP(PORTA_TCP, gerenciador);
     servidorTCP.start();
+    //Instancia e inicia a thread do servidor UDP
+    ServidorUDP servidorUDP = new ServidorUDP(gerenciador);
+    servidorUDP.start();
   }//fim do metodo
 }//fim da classe
