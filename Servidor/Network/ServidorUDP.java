@@ -1,7 +1,7 @@
 /***************************************************************** 
 * Autor..............: Lucas de Menezes Chaves
 * Matricula........: 202310282
-* Inicio...........: 20/06/2026
+* Inicio...........: 21/06/2026
 * Ultima alteracao.: 28/06/2026
 * Nome.............: ServidorUDP
 * Funcao...........: Estabelece servidor UDP para APDU de CONFIRM e SEND
@@ -52,7 +52,8 @@ public class ServidorUDP extends Thread {
         if(apdu.getOperacao().equals("SEND")) {
           System.out.println("[SEND] " + apdu.getNomeUsuario() + "enviou mensagem para o grupo '" + apdu.getNomeGrupo() + "'");
           //envia o CONFIRM como 1
-          APDU confirm = new APDU("CONFIRM", apdu.getNomeUsuario(), 1, "Servidor");
+          APDU confirm = new APDU("CONFIRM", apdu.getNomeUsuario(), 1, "Servidor", 
+          apdu.getNomeGrupo(), apdu.getNomeUsuario());
           enviarObjeto(socket, confirm, pacoteRecebido.getAddress(), apdu.getPortaClienteUDP());
           //encaminha a mensagem para os membros do grupo
           var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
@@ -63,7 +64,18 @@ public class ServidorUDP extends Thread {
               }//fim do if
             }//fim do for
           }//fim do if
-        }//fim do if
+        } else if(apdu.getOperacao().equals("CONFIRM")) {
+          String donoDaMensagem = apdu.getDonoDaMensagem();
+          var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
+          if(usuarios != null) {
+            for(Usuario u : usuarios) {
+              if(u.getNome().equals(donoDaMensagem)) {
+                enviarObjeto(socket, apdu, u.getIp(), u.getPortaUDP());
+                break;
+              }//fim do if
+            }//fim do for
+          }//fim do if
+        }//fim do if-elseif
       }//fim do while
     } catch(Exception e) {
       System.err.println("[UDP-ERRO] Falha no servidor UDP: " + e.getMessage());

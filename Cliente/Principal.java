@@ -11,6 +11,7 @@ import java.util.Scanner;
 import Network.Descobridor;
 import Network.RecebedorUDP;
 import Protocol.APDU;
+import Network.Mensagens;
 
 public class Principal {
   /********************************************************************
@@ -37,14 +38,15 @@ public class Principal {
   }//fim do if-else
   
   int portaUDPCliente = 5000 + (int)(Math.random() * 1000);
-  RecebedorUDP recebedor = new RecebedorUDP(portaUDPCliente);
+  RecebedorUDP recebedor = new RecebedorUDP(portaUDPCliente, ipServidor, 7777);
   recebedor.start();
   
   Cliente cliente = new Cliente(ipServidor, 6789);
   System.out.println("\nComandos disponíveis:");
   System.out.println("  -entrar <nomeGrupo> <nomeUsuario>");
   System.out.println("  -sair <nomeGrupo> <nomeUsuario>");
-  System.out.println(". -enviar <nomeGrupo> <nomeUsuario> <Texto>");
+  System.out.println("  -enviar <nomeGrupo> <nomeUsuario> <Texto>");
+  System.out.println("  -lido");
   System.out.println("  -fechar");
 
   while(true) {
@@ -69,28 +71,57 @@ public class Principal {
     String grupo = partes[1];
     String usuario = partes[2];
 
-    if(comando.equals("-entrar")) {
-      APDU joinMsg = new APDU("JOIN", grupo, usuario, null, portaUDPCliente);
-      cliente.enviarComandoTCP(joinMsg);
-    } else if (comando.equals("-sair")) {
-      APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDPCliente);
-      cliente.enviarComandoTCP(leaveMsg);
-    } else if (comando.equals("-enviar")) {
-      if(partes.length < 4) {
-        System.out.println("Formato incorreto, utilize: -comando <Grupo> <Usuario> <Mensagem>");
-        continue;
-      }//fim do if
+    switch (comando) {
+      case "-entrar": {
+        APDU joinMsg = new APDU("JOIN", grupo, usuario, null, portaUDPCliente);
+        Mensagens.meuNome = usuario;
+        cliente.enviarComandoTCP(joinMsg);
+        break;
+      }//fim do case
+      case "-sair": {
+        APDU leaveMsg = new APDU("LEAVE", grupo, usuario, null, portaUDPCliente);
+        cliente.enviarComandoTCP(leaveMsg);
+        break;
+      }//fim do case
+      case "-enviar": {
+        if(partes.length < 4) {
+          System.out.println("Formato incorreto, utilize: -comando <Grupo> <Usuario> <Mensagem>");
+          continue;
+        } else if (comando.equals("-lido")) {
+          if(Mensagens.ultimaMensagemId != null) {
+            APDU lido = new APDU("CONFIRM", Mensagens.ultimaMensagemId, 3,
+            Mensagens.meuNome, Mensagens.ultimoGrupo, Mensagens.ultimoRemetente);
+            cliente.enviarMensagemUDP(lido, 7777);
+            System.out.println(" ✓✓ Mensagem marcada como lida com sucesso!");
+          } else {
+            System.out.println(" Nenhuma mensagem recebida recentemente para marcar como lida.");
+          }//fim do if-else
+        }//fim do if
 
-      //Concatena tudo que o usuario escreveu para formar o texto
-      StringBuilder texto = new StringBuilder();
-      for(int i = 3; i < partes.length; i++) {
-        texto.append(partes[i]).append(" ");
-      }//fim do for
-      APDU sendMsg = new APDU("SEND", grupo, usuario, texto.toString().trim(), portaUDPCliente);
-      cliente.enviarMensagemUDP(sendMsg,7777);
-    }else {
-      System.out.println("Comando Desconhecido: " + comando);
-    }//fim do if-elseif-elseif-else
+        //Concatena tudo que o usuario escreveu para formar o texto
+        StringBuilder texto = new StringBuilder();
+        for(int i = 3; i < partes.length; i++) {
+          texto.append(partes[i]).append(" ");
+        }//fim do for
+        APDU sendMsg = new APDU("SEND", grupo, usuario, texto.toString().trim(), portaUDPCliente);
+        cliente.enviarMensagemUDP(sendMsg,7777);
+        break;
+      }//fim do case
+      case "-lido" : {
+        if(Mensagens.ultimaMensagemId != null) {
+        // Envia o Status 3
+        APDU confirm3 = new APDU("CONFIRM", Mensagens.ultimaMensagemId, 3, Mensagens.meuNome, Mensagens.ultimoGrupo, Mensagens.ultimoRemetente);
+        cliente.enviarMensagemUDP(confirm3, 7777);
+        System.out.println(" ✓✓ Mensagem marcada como lida com sucesso!");
+        } else {
+          System.out.println(" Nenhuma mensagem recebida recentemente para marcar como lida.");
+        }//fim do if-else
+      }//fim do case
+      default: {
+        System.out.println("Comando Desconhecido: " + comando);
+        break;
+      }//fim do case
+    }//fim do switch
   }//fim do while
   scanner.close();
  }//fim do metodo
