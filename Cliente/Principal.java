@@ -63,7 +63,7 @@ public class Principal {
         break;
     }//fim do if
 
-    if (partes.length < 3) {
+    if (partes.length < 1) {
         System.out.println("Formato incorreto. Utilize: -comando <grupo> <usuario>");
         continue;
     }//fim do if
@@ -116,6 +116,7 @@ public class Principal {
         } else {
           System.out.println(" Nenhuma mensagem recebida recentemente para marcar como lida.");
         }//fim do if-else
+        break;
       }//fim do case
       default: {
         System.out.println("Comando Desconhecido: " + comando);

@@ -76,7 +76,7 @@ public class APDU implements Serializable{
   * @param donoDaMensagem usuario que mandou a mensagem
   * @return void
   * ****************************************************************** */
- public APDU(String operacao, String idMensagem, int statusRecebido, String nomeUsuario, String nomeGrupo, String donoDaMnesagem) {
+ public APDU(String operacao, String idMensagem, int statusRecebido, String nomeUsuario, String nomeGrupo, String donoDaMensagem) {
   this.operacao = operacao.toUpperCase();
   this.idMensagem = idMensagem;
   this.statusRecebido = statusRecebido;
