@@ -45,7 +45,7 @@ public class RecebedorUDP extends Thread{
       
       //roteamento na interface do cliente
       if(apdu.getOperacao().equals("SEND")) {
-        System.out.println("\n[" + apdu.getNomeGrupo() + "]" + apdu.getNomeUsuario() + "diz: " + apdu.getTextoMensagem());
+        System.out.println("\n[" + apdu.getNomeGrupo() + "]" + apdu.getNomeUsuario() + " diz: " + apdu.getTextoMensagem());
         System.out.print("\n> "); //Repinta o cursor
 
       } else if(apdu.getOperacao().equals("CONFIRM")) {
