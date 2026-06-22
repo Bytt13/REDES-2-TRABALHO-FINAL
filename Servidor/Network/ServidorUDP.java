@@ -50,13 +50,29 @@ public class ServidorUDP extends Thread {
         ObjectInputStream in = new ObjectInputStream(bais);
         APDU apdu = (APDU) in.readObject();
         if(apdu.getOperacao().equals("SEND")) {
+          //validacao para nao mandar mensagens para grupos que nao faz parte
+          var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
+          boolean pertenceAoGrupo = false;
+          if(usuarios != null) {
+            for(Usuario u : usuarios) {
+              if(u.getNome().equals(apdu.getNomeUsuario())) {
+                pertenceAoGrupo = true;
+                break;
+              }//fim do if
+            }//fim do for
+          }//fim do if
+
+          if(!pertenceAoGrupo) {
+            System.out.println("[SEND-BLOQUEADO] '" + apdu.getNomeUsuario() + "' tentou enviar mensagem para grupo inexistente ou sem permissao: '" + apdu.getNomeGrupo() + "'");
+            continue; // Pula a execução e ignora o pacote do invasor
+          }//fim do if
+
           System.out.println("[SEND] " + apdu.getNomeUsuario() + "enviou mensagem para o grupo '" + apdu.getNomeGrupo() + "'");
           //envia o CONFIRM como 1
-          APDU confirm = new APDU("CONFIRM", apdu.getNomeUsuario(), 1, "Servidor", 
+          APDU confirm = new APDU("CONFIRM", apdu.getIdMensagem(), 1, "Servidor", 
           apdu.getNomeGrupo(), apdu.getNomeUsuario());
           enviarObjeto(socket, confirm, pacoteRecebido.getAddress(), apdu.getPortaClienteUDP());
           //encaminha a mensagem para os membros do grupo
-          var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
           if(usuarios != null) {
             for(Usuario u : usuarios) {
               if(!u.getNome().equals(apdu.getNomeUsuario())) {
