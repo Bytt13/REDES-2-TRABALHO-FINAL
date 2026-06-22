@@ -20,6 +20,7 @@ public class APDU implements Serializable{
   private String nomeGrupo;
   private String nomeUsuario;
   private String textoMensagem;
+  private String donoDaMensagem;
   //PortaUDP para o SEND
   private int portaClienteUDP;
   //Campos Extras para a APDU "CONFIRM" (Os ticks do zap)
@@ -63,6 +64,25 @@ public class APDU implements Serializable{
   this.idMensagem = idMensagem;
   this.statusRecebido = statusRecebido;
   this.nomeUsuario = nomeUsuario;
+ }//fim do metodo
+   /********************************************************************
+  * Metodo: APDU
+  * Funcao: Construtor 2 do objeto APDU para CONFRIM
+  * @param operacao "CONFIRM".
+  * @param idMensagem Id da mensagem enviada.
+  * @param statusRecebido status atual de recebimento.
+  * @param nomeUsuario usuario que esta confirmando o recebimento/leitura
+  * @param nomeGrupo grupo em que foi mandada a mensagem
+  * @param donoDaMensagem usuario que mandou a mensagem
+  * @return void
+  * ****************************************************************** */
+ public APDU(String operacao, String idMensagem, int statusRecebido, String nomeUsuario, String nomeGrupo, String donoDaMnesagem) {
+  this.operacao = operacao.toUpperCase();
+  this.idMensagem = idMensagem;
+  this.statusRecebido = statusRecebido;
+  this.nomeUsuario = nomeUsuario;
+  this.nomeGrupo = nomeGrupo;
+  this.donoDaMensagem = donoDaMensagem;
  }//fim do metodo
   /********************************************************************
   * Metodo: getOperacao
@@ -126,6 +146,15 @@ public class APDU implements Serializable{
   * ****************************************************************** */
  public int getStatusRecebido() {
   return statusRecebido;
+ }//fim do metodo
+  /********************************************************************
+  * Metodo: getDonoDaMensagem
+  * Funcao: Retornar o dono da mensagem
+  * @param void
+  * @return dono da mensagem
+  * ****************************************************************** */
+ public String getDonoDaMensagem() {
+  return donoDaMensagem;
  }//fim do metodo
   /********************************************************************
   * Metodo: toString
