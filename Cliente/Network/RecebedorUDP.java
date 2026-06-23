@@ -17,6 +17,17 @@ public class RecebedorUDP extends Thread{
   private final int minhaPorta;
   private final int portaServidor;
   private final String ipServidor;
+  private volatile MensagemListener listener;
+
+  /********************************************************************
+  * Metodo: setListener
+  * Funcao: Define o listener para callbacks
+  * @param listener objeto MensagemListener
+  * @return void
+  * ****************************************************************** */
+  public void setListener(MensagemListener listener) {
+    this.listener = listener;
+  }//fim do metodo
 
   /********************************************************************
   * Metodo: RecebedorUDP
@@ -59,6 +70,10 @@ public class RecebedorUDP extends Thread{
         APDU recebido = new APDU("CONFIRM", apdu.getIdMensagem(),2, Mensagens.meuNome, 
         apdu.getNomeGrupo(), apdu.getNomeUsuario());
         enviarConfirmParaServidor(recebido);
+        
+        if (listener != null) {
+          listener.onMessageReceived(apdu);
+        }//fim do if
       } else if(apdu.getOperacao().equals("CONFIRM")) {
           //Formata a saída dos Ticks lindamente no terminal
           String statusTxt = "";
@@ -67,6 +82,10 @@ public class RecebedorUDP extends Thread{
           else if(apdu.getStatusRecebido() == 3) statusTxt = "3 (Lida por " + apdu.getNomeUsuario() + ")";
           System.out.println("\n[Tick] Mensagem (" + apdu.getIdMensagem().substring(0,4) + "...) Status: " + statusTxt);
           System.out.print("> ");
+          
+          if (listener != null) {
+            listener.onTickReceived(apdu);
+          }//fim do if
       }//fim do if-elseif-else
     }//fim do while
   } catch(Exception e) {

@@ -11,7 +11,7 @@ import java.net.*;
 import Protocol.APDU;
 import java.io.*;
 
-public class Cliente {
+public class Cliente implements Network.Enviador {
   private String ipServidor;
   private int portaTCP;
 
@@ -30,9 +30,9 @@ public class Cliente {
   * Metodo: enviarComandoTCP
   * Funcao: enviar o comando TCP para se conectar no servidor
   * @param apdu objeto apdu
-  * @return void
+  * @return String
   * ****************************************************************** */
- public void enviarComandoTCP(APDU apdu) {
+ public String enviarComandoTCP(APDU apdu) {
   //Tenta conectar no IP e porta fornecidos
   try(Socket socket = new Socket(ipServidor, portaTCP);
     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -44,8 +44,10 @@ public class Cliente {
 
       String resposta = (String) in.readObject();
       System.out.println("Resposta do Servidor: " + resposta);
+      return resposta;
   } catch(Exception e) {
     System.err.println("Erro na comunicacao com o Servidor: " + e.getMessage());
+    return "[JOIN-ERRO] Erro na comunicacao com o Servidor";
   }//fim do try-catch
  }//fim do metodo
   /********************************************************************
