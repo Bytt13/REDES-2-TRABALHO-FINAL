@@ -11,6 +11,7 @@ package Network;
 
 import java.net.*;
 import java.io.*;
+import java.util.Collection;
 import Model.Grupos;
 import Model.Usuario;
 import Protocol.APDU;
@@ -51,7 +52,7 @@ public class ServidorUDP extends Thread {
         APDU apdu = (APDU) in.readObject();
         if(apdu.getOperacao().equals("SEND")) {
           //validacao para nao mandar mensagens para grupos que nao faz parte
-          var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
+          Collection<Usuario> usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
           boolean pertenceAoGrupo = false;
           if(usuarios != null) {
             for(Usuario u : usuarios) {
@@ -82,7 +83,7 @@ public class ServidorUDP extends Thread {
           }//fim do if
         } else if(apdu.getOperacao().equals("CONFIRM")) {
           String donoDaMensagem = apdu.getDonoDaMensagem();
-          var usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
+          Collection<Usuario> usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
           if(usuarios != null) {
             for(Usuario u : usuarios) {
               if(u.getNome().equals(donoDaMensagem)) {

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefWidth="900" prefHeight="600" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <left>
+        <VBox prefWidth="250" style="-fx-border-color: lightgray; -fx-border-width: 1; -fx-padding: 5;">
+            <Label text="Meus Grupos" style="-fx-font-weight: bold; -fx-padding: 5;"/>
+            <ListView fx:id="listaGrupos" VBox.vgrow="ALWAYS"/>
+            <VBox spacing="5">
+                <TextField fx:id="campoEntrarGrupo"/>
+                <HBox spacing="5" maxWidth="Infinity">
+                    <Button fx:id="botaoEntrar" text="Entrar" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#handleEntrarGrupo"/>
+                    <Button fx:id="botaoSair" text="Sair" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#handleSairGrupo"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </left>
+    <center>
+        <BorderPane style="-fx-border-color: lightgray; -fx-border-width: 1;">
+            <top>
+                <Label text="Chat" style="-fx-font-weight: bold; -fx-padding: 5;"/>
+            </top>
+            <center>
+                <ListView fx:id="areaChat"/>
+            </center>
+            <bottom>
+                <HBox spacing="5" style="-fx-padding: 5;">
+                    <TextField fx:id="campoMensagem" disable="true" HBox.hgrow="ALWAYS" onAction="#handleEnviarMensagem"/>
+                    <Button fx:id="botaoEnviar" text="Enviar" disable="true" onAction="#handleEnviarMensagem"/>
+                </HBox>
+            </bottom>
+        </BorderPane>
+    </center>
+</BorderPane>

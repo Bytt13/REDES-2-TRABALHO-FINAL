@@ -7,65 +7,112 @@
 * Funcao...........: Executa o Cliente
 *************************************************************** */
 
-import javax.swing.JOptionPane;
 import Network.Descobridor;
 import Network.RecebedorUDP;
 import Protocol.APDU;
 import Network.Mensagens;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+import javafx.application.Platform;
 
-public class Principal {
+public class Principal extends Application {
+  private static String ipServidor;
+  private static String nomeUsuarioFinal;
+  private static int portaUDPCliente;
+  private static RecebedorUDP recebedor;
+  private static Cliente cliente;
+
   /********************************************************************
    * Metodo: main
    * Funcao: inicia a execucao do programa
-   * @param void
+   * @param args argumentos
    * @return void
-  * ****************************************************************** */
- public static void main(String[] args) {
+   * ****************************************************************** */
+  public static void main(String[] args) {
+    System.out.println("====================================");
+    System.out.println("   BEM-VINDO AO CHAT");
+    System.out.println("====================================");
 
-  System.out.println("====================================");
-  System.out.println("   BEM-VINDO AO CHAT");
-  System.out.println("====================================");
+    // Iniciar JavaFX
+    launch(args);
+  }//fim do metodo
 
-  String ipServidor = Descobridor.buscarIPServidor();
+  /********************************************************************
+   * Metodo: start
+   * Funcao: inicia a interface grafica do JavaFX
+   * @param primaryStage palco principal do JavaFX
+   * @return void
+   * ****************************************************************** */
+  @Override
+  public void start(Stage primaryStage) {
+    ipServidor = Descobridor.buscarIPServidor();
 
-  if(ipServidor == null) {
-    System.out.println("Falha ao encontrar o servidor automaticamente.");
-    ipServidor = JOptionPane.showInputDialog(null, 
-        "Falha ao encontrar o servidor automaticamente.\nDigite o IP do servidor manualmente (ou 'localhost'):", 
-        "IP do Servidor", 
-        JOptionPane.QUESTION_MESSAGE);
-    
-    if (ipServidor != null) ipServidor = ipServidor.trim();
-    if (ipServidor == null || ipServidor.isEmpty()) {
-      System.out.println("IP nao informado. Encerrando...");
-      System.exit(0);
-    }//fim do if
-  } else {
-    System.out.println("Servidor encontrado automaticamente no IP: " + ipServidor);
-  }//fim do if-else
-  
-  int portaUDPCliente = 5000 + (int)(Math.random() * 1000);
-  RecebedorUDP recebedor = new RecebedorUDP(portaUDPCliente, ipServidor, 7777);
-  recebedor.start();
-  
-  Cliente cliente = new Cliente(ipServidor, 6789);
-
-  String nomeUsuarioUI = JOptionPane.showInputDialog(null, 
-      "Digite seu nome de usuario para o chat:", 
-      "Nome de Usuário", 
-      JOptionPane.QUESTION_MESSAGE);
+    if(ipServidor == null) {
+      System.out.println("Falha ao encontrar o servidor automaticamente.");
+      TextInputDialog dialogIp = new TextInputDialog();
+      dialogIp.setTitle("IP do Servidor");
+      dialogIp.setHeaderText("Falha ao encontrar o servidor automaticamente.\nDigite o IP do servidor manualmente (ou 'localhost'):");
+      dialogIp.setContentText("IP:");
       
-  if (nomeUsuarioUI != null) nomeUsuarioUI = nomeUsuarioUI.trim();
-  if (nomeUsuarioUI == null || nomeUsuarioUI.isEmpty()) {
-      System.out.println("Nome de usuario nao informado. Encerrando...");
-      System.exit(0);
-  }//fim do if
+      Optional<String> resultIp = dialogIp.showAndWait();
+      if (resultIp.isPresent()) {
+        ipServidor = resultIp.get().trim();
+      }//fim do if
+      
+      if (ipServidor == null || ipServidor.isEmpty()) {
+        System.out.println("IP nao informado. Encerrando...");
+        Platform.exit();
+        System.exit(0);
+        return;
+      }//fim do if
+    } else {
+      System.out.println("Servidor encontrado automaticamente no IP: " + ipServidor);
+    }//fim do if-else
+    
+    portaUDPCliente = 5000 + (int)(Math.random() * 1000);
+    recebedor = new RecebedorUDP(portaUDPCliente, ipServidor, 7777);
+    recebedor.start();
+    
+    cliente = new Cliente(ipServidor, 6789);
 
-  final String nomeUsuarioFinal = nomeUsuarioUI;
+    TextInputDialog dialogNome = new TextInputDialog();
+    dialogNome.setTitle("Nome de Usuario");
+    dialogNome.setHeaderText("Digite seu nome de usuario para o chat:");
+    dialogNome.setContentText("Nome:");
+    
+    Optional<String> resultNome = dialogNome.showAndWait();
+    String nomeUsuarioUI = null;
+    if (resultNome.isPresent()) {
+      nomeUsuarioUI = resultNome.get().trim();
+    }//fim do if
 
-  java.awt.EventQueue.invokeLater(() -> {
-      Interface.ChatUI gui = new Interface.ChatUI(cliente, recebedor, nomeUsuarioFinal, portaUDPCliente);
-      gui.setVisible(true);
-  });
- }//fim do metodo
+    if (nomeUsuarioUI == null || nomeUsuarioUI.isEmpty()) {
+        System.out.println("Nome de usuario nao informado. Encerrando...");
+        Platform.exit();
+        System.exit(0);
+        return;
+    }//fim do if
+
+    nomeUsuarioFinal = nomeUsuarioUI;
+
+    Controller.ChatController controller = new Controller.ChatController(cliente, recebedor, nomeUsuarioFinal, portaUDPCliente);
+    
+    try {
+      javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/View/ChatUI.fxml"));
+      if (loader.getLocation() == null) {
+        loader.setLocation(new java.io.File("View/ChatUI.fxml").toURI().toURL());
+      }
+      loader.setController(controller);
+      javafx.scene.Parent root = loader.load();
+      controller.setStage(primaryStage);
+      
+      javafx.scene.Scene scene = new javafx.scene.Scene(root);
+      primaryStage.setScene(scene);
+      primaryStage.show();
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+  }//fim do metodo
 }//fim da classe
