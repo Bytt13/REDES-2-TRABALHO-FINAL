@@ -42,6 +42,7 @@ public class ChatController implements MensagemListener {
   @FXML private Button botaoEnviar;
   @FXML private Button botaoEntrar;
   @FXML private Button botaoSair;
+  @FXML private Button botaoVerMembros;
   @FXML private TextField campoEntrarGrupo;
 
   private Stage stage;
@@ -175,6 +176,14 @@ public class ChatController implements MensagemListener {
         listaGrupos.getItems().add(g);
         listaGrupos.getSelectionModel().select(g);
         campoEntrarGrupo.clear();
+
+        // Avisar no chat que o usuario entrou
+        APDU mensagemAviso = new APDU("SEND", g, nomeUsuario, "[Aviso] " + nomeUsuario + " entrou no grupo!", portaUDPCliente);
+        MensagemWrapper mwAviso = new MensagemWrapper(mensagemAviso, true);
+        mensagensGrupo.putIfAbsent(g, new ArrayList<>());
+        mensagensGrupo.get(g).add(mwAviso);
+        mapaMensagensEnviadas.put(mensagemAviso.getIdMensagem(), mwAviso);
+        cliente.enviarMensagemUDP(mensagemAviso, 7777);
       }//fim do if-else
     }//fim do if
   }//fim do metodo
@@ -224,6 +233,37 @@ public class ChatController implements MensagemListener {
       }//fim do if
     }//fim do if-else
     renderizarChat(grupoAtual, mensagensGrupo.getOrDefault(grupoAtual, new ArrayList<>()));
+  }//fim do metodo
+
+  /********************************************************************
+  * Metodo: handleVerMembros
+  * Funcao: Handler do botao Ver membros
+  * @param void
+  * @return void
+  * ****************************************************************** */
+  @FXML
+  private void handleVerMembros() {
+    if (grupoAtual != null) {
+      APDU req = new APDU("MEMBERS", grupoAtual, nomeUsuario, null, portaUDPCliente);
+      String resposta = cliente.enviarComandoTCP(req);
+      if (resposta != null && resposta.startsWith("OK: ")) {
+        String membros = resposta.substring(4);
+        String[] lista = membros.split(",");
+        StringBuilder sb = new StringBuilder("Membros do grupo " + grupoAtual + ":\n");
+        for (String m : lista) {
+          if (!m.isEmpty()) {
+            sb.append("- ").append(m).append("\n");
+          }//fim do if
+        }//fim do for
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Membros do Grupo");
+        alert.setHeaderText(null);
+        alert.setContentText(sb.toString());
+        alert.showAndWait();
+      } else {
+        mostrarErro("Nao foi possivel obter a lista de membros.", "Erro");
+      }//fim do if-else
+    }//fim do if
   }//fim do metodo
 
   /********************************************************************

@@ -20,7 +20,14 @@
     <center>
         <BorderPane style="-fx-border-color: lightgray; -fx-border-width: 1;">
             <top>
-                <Label text="Chat" style="-fx-font-weight: bold; -fx-padding: 5;"/>
+                <BorderPane style="-fx-padding: 5;">
+                    <left>
+                        <Label text="Chat" style="-fx-font-weight: bold;"/>
+                    </left>
+                    <right>
+                        <Button fx:id="botaoVerMembros" text="Ver membros" onAction="#handleVerMembros"/>
+                    </right>
+                </BorderPane>
             </top>
             <center>
                 <ListView fx:id="areaChat"/>

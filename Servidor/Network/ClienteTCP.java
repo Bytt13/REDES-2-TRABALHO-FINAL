@@ -11,6 +11,7 @@ package Network;
 
 import java.net.*;
 import java.io.*;
+import java.util.Collection;
 import Model.Usuario;
 import Model.Grupos;
 import Protocol.APDU;
@@ -65,6 +66,17 @@ public class ClienteTCP extends Thread{
         out.writeObject("OK: Saiu do grupo com sucesso");
       } else {
         out.writeObject("ERRO: Usuario nao encontrado no grupo.");
+      }//fim do if-else
+    } else if(operacao.equals("MEMBERS")) {
+      Collection<Usuario> usuarios = gerenciador.getUsuariosDoGrupo(apdu.getNomeGrupo());
+      if (usuarios != null) {
+        StringBuilder sb = new StringBuilder("OK: ");
+        for (Usuario u : usuarios) {
+          sb.append(u.getNome()).append(",");
+        }//fim do for
+        out.writeObject(sb.toString());
+      } else {
+        out.writeObject("ERRO: Grupo nao encontrado.");
       }//fim do if-else
     } else {
       System.out.println("[AVISO] Comando TCP desconhecido: " + operacao);
