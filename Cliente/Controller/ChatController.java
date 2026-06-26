@@ -23,6 +23,8 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.geometry.Pos;
 
 import javafx.stage.Stage;
 
@@ -35,6 +37,7 @@ public class ChatController implements MensagemListener {
 
   private Map<String, List<MensagemWrapper>> mensagensGrupo;
   private Map<String, MensagemWrapper> mapaMensagensEnviadas;
+  private Map<String, Integer> mensagensNaoLidas;
   
   @FXML private ListView<String> listaGrupos;
   @FXML private ListView<javafx.scene.text.TextFlow> areaChat;
@@ -82,6 +85,7 @@ public class ChatController implements MensagemListener {
     this.portaUDPCliente = portaUDPCliente;
     this.mensagensGrupo = new HashMap<>();
     this.mapaMensagensEnviadas = new HashMap<>();
+    this.mensagensNaoLidas = new HashMap<>();
 
     recebedor.setListener(this);
   }//fim do metodo
@@ -106,6 +110,41 @@ public class ChatController implements MensagemListener {
   * ****************************************************************** */
   @FXML
   public void initialize() {
+    listaGrupos.setCellFactory(lv -> new ListCell<String>() {
+      private HBox hbox = new HBox();
+      private Label nameLabel = new Label();
+      private Label unreadLabel = new Label();
+      private Region spacer = new Region();
+
+      {
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        hbox.setAlignment(Pos.CENTER_LEFT);
+        unreadLabel.setStyle("-fx-background-color: #25D366; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-font-weight: bold; -fx-font-size: 10px;");
+        hbox.getChildren().addAll(nameLabel, spacer, unreadLabel);
+      }
+
+      @Override
+      protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty || item == null) {
+          setGraphic(null);
+          setText(null);
+        } else {
+          nameLabel.setText(item);
+          int unread = mensagensNaoLidas.getOrDefault(item, 0);
+          if (unread > 0) {
+            unreadLabel.setText(String.valueOf(unread));
+            unreadLabel.setVisible(true);
+            unreadLabel.setManaged(true);
+          } else {
+            unreadLabel.setVisible(false);
+            unreadLabel.setManaged(false);
+          }
+          setGraphic(hbox);
+        }
+      }
+    });
+
     listaGrupos.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
       selecionarGrupo(newVal);
     });
@@ -196,6 +235,10 @@ public class ChatController implements MensagemListener {
   * ****************************************************************** */
   public void sairGrupo(String g) {
     if (g != null) {
+      // Avisar no chat que o usuario saiu
+      APDU mensagemAviso = new APDU("SEND", g, nomeUsuario, "[Aviso] " + nomeUsuario + " saiu do grupo!", portaUDPCliente);
+      cliente.enviarMensagemUDP(mensagemAviso, 7777);
+      
       listaGrupos.getItems().remove(g);
       APDU mensagemLeave = new APDU("LEAVE", g, nomeUsuario, null, portaUDPCliente);
       cliente.enviarComandoTCP(mensagemLeave);
@@ -219,6 +262,9 @@ public class ChatController implements MensagemListener {
       campoMensagem.setDisable(true);
       botaoEnviar.setDisable(true);
     } else {
+      mensagensNaoLidas.put(grupo, 0);
+      listaGrupos.refresh();
+      
       campoMensagem.setDisable(false);
       botaoEnviar.setDisable(false);
       
@@ -309,6 +355,9 @@ public class ChatController implements MensagemListener {
         APDU lido = new APDU("CONFIRM", apdu.getIdMensagem(), 3, nomeUsuario, grupo, remetente);
         cliente.enviarMensagemUDP(lido, 7777);
         renderizarChat(grupoAtual, mensagensGrupo.getOrDefault(grupoAtual, new ArrayList<>()));
+      } else {
+        mensagensNaoLidas.put(grupo, mensagensNaoLidas.getOrDefault(grupo, 0) + 1);
+        listaGrupos.refresh();
       }//fim do if
     });
   }//fim do metodo
