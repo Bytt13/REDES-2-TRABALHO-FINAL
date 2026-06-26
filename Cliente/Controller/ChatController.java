@@ -47,6 +47,7 @@ public class ChatController implements MensagemListener {
   @FXML private Button botaoSair;
   @FXML private Button botaoVerMembros;
   @FXML private TextField campoEntrarGrupo;
+  @FXML private Button botaoListarGrupos;
 
   private Stage stage;
 
@@ -311,6 +312,57 @@ public class ChatController implements MensagemListener {
       }//fim do if-else
     }//fim do if
   }//fim do metodo
+
+  /********************************************************************
+  * Metodo: handleListarGrupos
+  * Funcao: Handler do botao Listar Grupos Existentes
+  * @param void
+  * @return void
+  * ****************************************************************** */
+  @FXML
+  private void handleListarGrupos() {
+    APDU req = new APDU("LIST", null, nomeUsuario, null, portaUDPCliente);
+    String resposta = cliente.enviarComandoTCP(req);
+    
+    if (resposta != null && resposta.startsWith("OK: ")) {
+      String grupos = resposta.substring(4);
+      String[] lista = grupos.split(",");
+      
+      ListView<HBox> listView = new ListView<>();
+      boolean temGrupos = false;
+      
+      for (String g : lista) {
+        if (!g.isEmpty()) {
+          HBox hbox = new HBox(10);
+          hbox.setAlignment(Pos.CENTER_LEFT);
+          Label nameLabel = new Label(g);
+          Region spacer = new Region();
+          HBox.setHgrow(spacer, Priority.ALWAYS);
+          
+          Button btnEntrar = new Button("Entrar");
+          btnEntrar.setOnAction(e -> {
+            entrarGrupo(g);
+          });
+          
+          hbox.getChildren().addAll(nameLabel, spacer, btnEntrar);
+          listView.getItems().add(hbox);
+          temGrupos = true;
+        }//fim do if
+      }//fim do for
+      
+      if (!temGrupos) {
+        listView.getItems().add(new HBox(new Label("Nenhum grupo existente no momento.")));
+      }
+      
+      Alert alert = new Alert(Alert.AlertType.INFORMATION);
+      alert.setTitle("Grupos Existentes");
+      alert.setHeaderText("Selecione um grupo para entrar:");
+      alert.getDialogPane().setContent(listView);
+      alert.showAndWait();
+    } else {
+      mostrarErro("Nao foi possivel obter a lista de grupos.", "Erro");
+    }//fim do if-else
+  }
 
   /********************************************************************
   * Metodo: enviarMensagem

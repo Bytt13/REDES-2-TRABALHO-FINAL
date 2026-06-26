@@ -85,4 +85,12 @@ public class Grupos {
     //usaremos futuramente para o SEND, e assim, ja sairao em ordem alfabetica
     return grupos.get(nomeGrupo);
   }//fim do metodo
+  /********************************************************************
+   * Metodo: getGrupos
+   * Funcao: Retorna a colecao de grupos
+   * @return uma collection com os grupos
+  * ****************************************************************** */
+  public Collection<String> getGrupos() {
+    return grupos.keySet();
+  }//fim do metodo
 }//fim da classe

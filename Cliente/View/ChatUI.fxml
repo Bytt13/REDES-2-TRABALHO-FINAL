@@ -14,6 +14,7 @@
                     <Button fx:id="botaoEntrar" text="Entrar" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#handleEntrarGrupo"/>
                     <Button fx:id="botaoSair" text="Sair" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#handleSairGrupo"/>
                 </HBox>
+                <Button fx:id="botaoListarGrupos" text="Listar Grupos Existentes" maxWidth="Infinity" onAction="#handleListarGrupos"/>
             </VBox>
         </VBox>
     </left>

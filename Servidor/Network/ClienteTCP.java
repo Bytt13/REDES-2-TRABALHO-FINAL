@@ -77,6 +77,17 @@ public class ClienteTCP extends Thread{
         out.writeObject(sb.toString());
       } else {
         out.writeObject("ERRO: Grupo nao encontrado.");
+      }
+    } else if(operacao.equals("LIST")) {
+      Collection<String> grupos = gerenciador.getGrupos();
+      if(grupos != null && !grupos.isEmpty()) {
+        StringBuilder sb = new StringBuilder("OK: ");
+        for (String g : grupos) {
+          sb.append(g).append(",");
+        }//fim do for
+        out.writeObject(sb.toString());
+      } else {
+        out.writeObject("OK: ");
       }//fim do if-else
     } else {
       System.out.println("[AVISO] Comando TCP desconhecido: " + operacao);
